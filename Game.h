@@ -4,8 +4,15 @@
 
 #ifndef GAME_H
 #define GAME_H
-#include <SDL3/SDL_video.h>
 
+
+class SDL_Window;
+class SDL_Renderer;
+
+struct Vector2 {
+    float x;
+    float y;
+};
 
 class Game {
 public:
@@ -20,9 +27,15 @@ public:
 private:
     void ProcessInput();
     void UpdateGame();
+
+    void DrawWalls(float thickness);
+
     void GenerateOutput();
 
     SDL_Window* window;
+    SDL_Renderer* mRenderer;
+    Vector2 mPaddlePosition;
+    Vector2 mBallPosition;
     bool mIsRunning;
 };
 
