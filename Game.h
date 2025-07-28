@@ -28,14 +28,19 @@ private:
     void ProcessInput();
     void UpdateGame();
 
-    void DrawWalls(float thickness);
+    void DrawWalls();
 
     void GenerateOutput();
 
     SDL_Window* window;
     SDL_Renderer* mRenderer;
+    int mTicksCount;
     Vector2 mPaddlePosition;
     Vector2 mBallPosition;
+    Vector2 mBallVel = {-200.0f, 235.0f };
+    float thickness = 15;
+    int mPaddleH;
+    int mPaddleDir;
     bool mIsRunning;
 };
 

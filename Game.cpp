@@ -4,6 +4,8 @@
 #include<SDL3/SDL.h>
 #include "Game.h"
 
+#include <cmath>
+
 Game::Game() {
     this->window = nullptr;
     this->mIsRunning = false;
@@ -57,13 +59,57 @@ void Game::ProcessInput() {
     if (keys[SDL_SCANCODE_ESCAPE]) {
         this->mIsRunning = false;
     }
+    this->mPaddleDir = 0;
+    if (keys[SDL_SCANCODE_W])
+        mPaddleDir -= 1;
+    if (keys[SDL_SCANCODE_S])
+        mPaddleDir += 1;
+
 }
 
 void Game::UpdateGame() {
-    SDL_Log("UPDATE GAME");
+    Uint64 targetTicks = SDL_GetTicks() + 16;
+    while (SDL_GetTicks() < targetTicks);
+    float deltaTime = (SDL_GetTicks() - this->mTicksCount) / 1000.0f;
+    this->mTicksCount = SDL_GetTicks();
+
+    if (deltaTime > 0.05f) {
+        deltaTime = 0.05f;
+    }
+
+    if (this->mPaddleDir != 0) {
+        mPaddlePosition.y += mPaddleDir * 300.0f * deltaTime;
+        if (mPaddlePosition.y < (mPaddleH/2.0f + thickness)) {
+            mPaddlePosition.y = mPaddleH/2.0f + thickness;
+        } else if (mPaddlePosition.y > (600 - mPaddleH/2.0f - thickness)) {
+            mPaddlePosition.y = (600 - mPaddleH/2.0f - thickness);
+        }
+    }
+    mBallPosition.x += mBallVel.x * deltaTime;
+    mBallPosition.y += mBallVel.y * deltaTime;
+    if (mBallPosition.y <= (thickness + thickness) && mBallVel.y < 0.0f) {
+        mBallVel.y *= -1;
+    }
+    if (mBallPosition.y >= 600 && mBallVel.y > 0.0f) {
+        mBallVel.y *= -1;
+    }
+
+    if (mBallPosition.x >= 800 && mBallVel.x > 0.0f) {
+        mBallVel.x *= -1;
+    }
+
+    float diff = std::abs(mBallPosition.y  - mPaddlePosition.y);
+    if (
+        diff <= mPaddleH / 2.0f &&
+        mBallPosition.x <= 25.0f && mBallPosition.x >= 20.0f &&
+        mBallVel.x < 0.0f
+    ) {
+        mBallVel.x *= -1;
+    }
+
 }
 
-void Game::DrawWalls(const float thickness) {
+void Game::DrawWalls() {
     SDL_FRect topWall {
         0,
         0,
@@ -90,11 +136,10 @@ void Game::DrawWalls(const float thickness) {
 }
 
 void Game::GenerateOutput() {
-    const int thickness = 15;
     SDL_SetRenderDrawColor(this->mRenderer, 0, 0, 255, 255);
     SDL_RenderClear(this->mRenderer); //clear back buffer
     SDL_SetRenderDrawColor(this->mRenderer, 255, 255, 255, 255);
-    DrawWalls(thickness);
+    DrawWalls();
     SDL_FRect ball {
         this->mBallPosition.x - thickness/2,
         this->mBallPosition.y - thickness/2,
@@ -107,6 +152,7 @@ void Game::GenerateOutput() {
         thickness,
         thickness * 4
     };
+    this->mPaddleH = thickness * 4;
     SDL_RenderFillRect(this->mRenderer, &ball);
     SDL_RenderFillRect(this->mRenderer, &paddle);
     SDL_RenderPresent(this->mRenderer); //swap front and back buffer
