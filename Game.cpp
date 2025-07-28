@@ -106,6 +106,10 @@ void Game::UpdateGame() {
     ) {
         mBallVel.x *= -1;
     }
+    else if (mBallPosition.x <= 0.0f) {
+        SDL_Log("Game Over!");
+        this->mIsRunning = false;
+    }
 
 }
 
