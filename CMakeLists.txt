@@ -8,7 +8,9 @@ find_package(SDL3 REQUIRED CONFIG)
 
 add_executable(GameBasecamp main.cpp
         Game.cpp
-        Game.h)
+        Game.h
+        Actor.cpp
+        Actor.h)
 
 target_link_libraries(GameBasecamp PRIVATE SDL3::SDL3)
 
